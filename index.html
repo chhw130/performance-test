@@ -81,9 +81,14 @@
     </header>
 
     <section class="hero">
-      <img class="desktop" src="images/Hero_Desktop.avif" />
-      <img class="mobile" src="images/Hero_Mobile.avif" />
-      <img class="tablet" src="images/Hero_Tablet.avif" />
+      <picture>
+        <source media="(max-width: 575px)" srcset="images/Hero_Mobile.avif" />
+        <source
+          media="(min-width: 576px) and (max-width: 960px)"
+          srcset="images/Hero_Tablet.avif"
+        />
+        <img src="images/Hero_Desktop.avif" />
+      </picture>
 
       <div class="hero-content">
         <div class="container">
