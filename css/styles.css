@@ -198,10 +198,7 @@ section.country-bar {
   flex-direction: column;
   height: 60px;
   background-color: #f2f2f2;
-}
-
-section.country-bar.hidden {
-  display: none;
+  opacity: 1;
 }
 
 section.best-sellers {
