@@ -27,7 +27,7 @@
 
 ## 개선하기
 
-### 이미지 최적화
+### FCP, LCP 개선
 
 #### 이미지 형식(webp, avif)
 
@@ -59,6 +59,44 @@
 
 <br/>
 
+#### 렌더링 차단 리소스 제거
+
+<img width="952" alt="스크린샷 2024-08-12 오후 9 41 06" src="https://github.com/user-attachments/assets/6f36db4c-425d-4e4e-836c-5d843f512599">
+
+- font 프로젝트 내부에서 호스팅
+![스크린샷 2024-08-14 오후 10 32 17](https://github.com/user-attachments/assets/b3f30c4b-cdc4-4033-899f-42f6f0b7740b)
+
+
+- script 비동기 처리
+```html
+    <script
+      defer
+      type="text/javascript"
+      src="//www.freeprivacypolicy.com/public/cookie-consent/4.1.0/cookie-consent.js"
+      charset="UTF-8"
+    ></script>
+    <script defer type="text/javascript" charset="UTF-8">
+      // Dom이 로드 된 이후에 실행해주기
+      document.addEventListener("DOMContentLoaded", function () {
+        cookieconsent.run({
+          notice_banner_type: "simple",
+          consent_type: "express",
+          palette: "light",
+          language: "en",
+          page_load_consent_levels: ["strictly-necessary"],
+          notice_banner_reject_button_hide: false,
+          preferences_center_close_button_hide: false,
+          page_refresh_confirmation_buttons: false,
+          website_name: "Performance Course",
+        });
+      });
+    </script>
+```
+
+<br/>
+
+### CLS 개선
+
 #### img태그 width/height 속성 & 반응형 이미지 제공
 <img width="948" alt="스크린샷 2024-08-12 오후 9 39 31" src="https://github.com/user-attachments/assets/b708548b-e619-4cf4-8158-dff69c02a882">
 
@@ -84,15 +122,93 @@
   />
 </picture>
 ```
-img태그에 width & height속성 부여 -> 미리 설정하여 layout shifting방지
-반응형으로 이미지 제공 -> 뷰 포트에 맞는 이미지만 로드
+`img태그에 width & height속성 부여 -> 미리 설정하여 layout shifting방지`
+`반응형으로 이미지 제공 -> 뷰 포트에 맞는 이미지만 로드`
 
 <br/>
 
-### CLS부분 최적화
+
+#### fallback UI 제공
 - AS-IS
 ![layout shifting before](https://github.com/user-attachments/assets/f65e3dc9-1a10-43c8-bc13-1184bdd1a463)
 - TO-BE
 ![layout shifting after](https://github.com/user-attachments/assets/14f064a4-658f-447c-afdb-fd100724339a)
+`fallback UI 제공 -> layout shifting 방지`
+
+<br/>
 
 
+#### 실제 상호작용이 일어날 때 스크립트 실행처리
+
+프로젝트 시나리오 : 뷰포트에서 스크롤을 내려서 product section이 보일 때 loadProducts실행 및 무거운연산 처리하기
+```javascript
+window.onload = () => {
+  let productSection = document.querySelector("#all-products");
+  let status = "idle";
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting && status === "idle") {
+        status = "loading";
+        loadProducts().then(() => {
+          status = "idle";
+        });
+        // Simulate heavy operation. It could be a complex price calculation.
+        for (let i = 0; i < 10000000; i++) {
+          const temp = Math.sqrt(i) * Math.sqrt(i);
+        }
+      }
+    });
+  });
+
+  observer.observe(productSection);
+};
+```
+`scroll이벤트 방식은 scroll이 발생할 때마다 이벤트가 발생하는 문제가 있음 -> Intersection Observer API를 활용하여 특정 지점을 교차할 때 이벤트 발생시키기`
+
+
+### 접근성 및 검색엔진 최적화 하기
+
+#### 이미지에 alt속성 부여
+alt속성을 부여한 장점
+- 이미지 로드 실패 시 대체 텍스트를 제공.
+- 검색 엔진에 최적화 할 수 있음.
+- 스크린 리더기에 의미를 제공.
+
+#### meta tag description속성 부여
+```javascript
+<meta name="description" content="hanghae-plus" />
+```
+
+#### 제목요소를 내림차순으로 표시하기
+```html
+<h1>Article Title</h1>
+  <section>
+    <h2>Introduction</h2>
+    <p>...</p>
+  </section>
+  <section>
+    <h2>Overview</h2>
+    <section>
+      <h3>Benefits</h3>
+      <p>...</p>
+      <section>
+        <h4>Case Study</h4>
+        <p>...</p>
+      </section>
+      <section>
+        <h4>Statistics</h4>
+        <p>...</p>
+      </section>
+    </section>
+    <section>
+      <h3>Conclusion</h3>
+      <p>...</p>
+    </section>
+  </section>
+```
+
+
+## TO-BE
+
+![최종](https://github.com/user-attachments/assets/a2d46820-c8cd-4738-8ab4-9ad7bd702c07)
